@@ -1,0 +1,13 @@
+{
+  "name": "Match Tracker",
+  "short_name": "MatchTracker",
+  "description": "Sideline substitution and playing-time tracker for a volunteer football coach.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b3d0b",
+  "theme_color": "#0b3d0b",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
