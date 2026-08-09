@@ -10,6 +10,23 @@ function getCtx() {
   return audioCtx;
 }
 
+// iOS Safari only allows an AudioContext to make sound if it was created (or
+// resumed) synchronously inside a real user-gesture handler at least once in
+// the session. The half-time/full-time alert fires on its own from a timer
+// effect, which is NOT a user gesture, so if this is the first thing to ever
+// touch the AudioContext, iOS will keep it 'suspended' and the beep will be
+// silent. Call this from an actual tap handler (e.g. "Start Match") as early
+// as possible in the session to unlock it well before the alert needs it.
+export function unlockAudio() {
+  try {
+    const ctx = getCtx();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+  } catch (e) {
+    // ignore
+  }
+}
+
 export function playAlertBeep() {
   try {
     const ctx = getCtx();

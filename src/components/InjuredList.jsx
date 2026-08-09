@@ -7,7 +7,9 @@ export default function InjuredList({ players, onUninjure }) {
 
   return (
     <section className="list-section">
-      <h2>Injured ({injured.length})</h2>
+      <div className="list-eyebrow">
+        <h2>Injured · {injured.length}</h2>
+      </div>
       <div className="player-list">
         {injured.map((p) => (
           <PlayerCard
@@ -15,7 +17,7 @@ export default function InjuredList({ players, onUninjure }) {
             number={p.number}
             status="injured"
             time={formatMinSec(p.totalSeconds)}
-            timeLabel="total played"
+            timeLabel="Total"
             actions={[{ label: 'Un-injure', variant: 'btn-primary', onClick: () => onUninjure(p.id) }]}
           />
         ))}

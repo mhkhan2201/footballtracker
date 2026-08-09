@@ -4,6 +4,7 @@ import { useTicker } from '../hooks/useTicker';
 import { useWakeLock } from '../hooks/useWakeLock';
 import { getElapsedMs, formatClock } from '../utils/time';
 import { playAlertBeep, vibrateAlert } from '../utils/audio';
+import Icon from '../components/Icon';
 import EndMatchDialog from '../components/EndMatchDialog';
 
 export default function HalfTimeScreen() {
@@ -27,22 +28,31 @@ export default function HalfTimeScreen() {
   }, [timeUp, state.halftimeOverAlerted, dispatch]);
 
   return (
-    <div className="screen center-screen">
-      <div className="card">
-        <h1>Half Time</h1>
-        <div className={`clock-display${timeUp ? ' clock-over' : ''}`}>
-          <div className="clock-label">{timeUp ? "Time's up" : 'Break remaining'}</div>
-          <div className="clock-time">{formatClock(remaining)}</div>
-        </div>
-        <p className="muted">Player total playing time is paused and will resume in the 2nd half.</p>
-        <div className="stack-buttons">
-          <button className="btn btn-primary btn-large" onClick={() => dispatch({ type: 'START_SECOND_HALF' })}>
-            Start 2nd Half
-          </button>
-          <button className="btn btn-danger-outline" onClick={() => setShowEndDialog(true)}>
-            End Match
-          </button>
-        </div>
+    <div className="screen" style={{ display: 'flex', flexDirection: 'column' }}>
+      <div className={`ht-hero${timeUp ? ' over' : ''}`}>
+        {timeUp && <Icon name="warn" className="icon" style={{ width: 28, height: 28 }} />}
+        <span className="eyebrow" style={{ color: 'rgba(255,255,255,.68)' }}>
+          Half Time · {timeUp ? "Time's Up" : 'Break'}
+        </span>
+        <div className="num">{formatClock(remaining)}</div>
+        <p className="cap">
+          {timeUp
+            ? "Beep + vibration fired once. Whenever you're ready —"
+            : 'Player totals are paused and will resume the moment the 2nd half starts.'}
+        </p>
+        <button
+          className="btn btn-large"
+          style={{ background: 'var(--chalk)', color: timeUp ? 'var(--red-800)' : 'var(--pitch-800)' }}
+          onClick={() => dispatch({ type: 'START_SECOND_HALF' })}
+        >
+          Start 2nd Half
+        </button>
+      </div>
+
+      <div style={{ marginTop: '1rem' }}>
+        <button className="btn btn-danger-outline btn-block" onClick={() => setShowEndDialog(true)}>
+          End Match
+        </button>
       </div>
 
       {showEndDialog && (

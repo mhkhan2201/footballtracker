@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { MatchProvider, useMatchState } from './state/MatchContext';
 import { getInitialState } from './state/matchReducer';
 import { loadState, clearState } from './utils/storage';
+import IconSprite from './components/IconSprite';
 import ResumePrompt from './screens/ResumePrompt';
 import SetupScreen from './screens/SetupScreen';
 import MatchScreen from './screens/MatchScreen';
@@ -28,13 +29,16 @@ export default function App() {
 
   if (decision === null) {
     return (
-      <ResumePrompt
-        onResume={() => setDecision('resume')}
-        onFresh={() => {
-          clearState();
-          setDecision('fresh');
-        }}
-      />
+      <>
+        <IconSprite />
+        <ResumePrompt
+          onResume={() => setDecision('resume')}
+          onFresh={() => {
+            clearState();
+            setDecision('fresh');
+          }}
+        />
+      </>
     );
   }
 
@@ -42,6 +46,7 @@ export default function App() {
 
   return (
     <MatchProvider initialState={initialState}>
+      <IconSprite />
       <Screens />
     </MatchProvider>
   );

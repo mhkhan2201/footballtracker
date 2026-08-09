@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMatchDispatch } from '../state/MatchContext';
+import { unlockAudio } from '../utils/audio';
 
 function makeArray(n, fill = '') {
   return Array.from({ length: n }, () => fill);
@@ -46,6 +47,12 @@ export default function SetupScreen() {
     e.preventDefault();
     setError('');
 
+    // Anchor the AudioContext to this real tap, as early in the session as
+    // possible — iOS Safari otherwise keeps it suspended and the half-time/
+    // full-time beep fired later from a timer effect (not a user gesture)
+    // would be silent. See utils/audio.js.
+    unlockAudio();
+
     const trimmedField = fieldNumbers.map((v) => v.trim());
     const trimmedBench = benchNumbers.map((v) => v.trim()).filter((v) => v !== '');
 
@@ -82,31 +89,41 @@ export default function SetupScreen() {
         <h1>Match Setup</h1>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-row two-col">
-            <label className="field">
-              <span>Field slots</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max="15"
-                value={fieldSlots}
-                onChange={(e) => resizeFieldSlots(e.target.value)}
-              />
-            </label>
-            <label className="field">
-              <span>Half length (min)</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min="1"
-                value={halfLengthMin}
-                onChange={(e) => setHalfLengthMin(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="form-row">
+          <div className="stack-buttons" style={{ marginTop: 0, gap: '0.6rem' }}>
+            <div className="stepper">
+              <span className="lbl">FIELD SLOTS</span>
+              <span className="val">
+                <button type="button" className="stepbtn" onClick={() => resizeFieldSlots(fieldSlots - 1)} aria-label="Fewer field slots">
+                  −
+                </button>
+                {fieldSlots}
+                <button type="button" className="stepbtn" onClick={() => resizeFieldSlots(fieldSlots + 1)} aria-label="More field slots">
+                  +
+                </button>
+              </span>
+            </div>
+            <div className="stepper">
+              <span className="lbl">HALF LENGTH (MIN)</span>
+              <span className="val">
+                <button
+                  type="button"
+                  className="stepbtn"
+                  onClick={() => setHalfLengthMin((v) => Math.max(1, Number(v) - 1))}
+                  aria-label="Shorter half"
+                >
+                  −
+                </button>
+                {halfLengthMin}
+                <button
+                  type="button"
+                  className="stepbtn"
+                  onClick={() => setHalfLengthMin((v) => Number(v) + 1)}
+                  aria-label="Longer half"
+                >
+                  +
+                </button>
+              </span>
+            </div>
             <label className="field checkbox-row">
               <input
                 type="checkbox"
@@ -116,16 +133,28 @@ export default function SetupScreen() {
               <span>Substitution check reminder</span>
             </label>
             {reminderEnabled && (
-              <label className="field">
-                <span>Remind every (min)</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min="1"
-                  value={reminderIntervalMin}
-                  onChange={(e) => setReminderIntervalMin(e.target.value)}
-                />
-              </label>
+              <div className="stepper">
+                <span className="lbl">REMIND EVERY (MIN)</span>
+                <span className="val">
+                  <button
+                    type="button"
+                    className="stepbtn"
+                    onClick={() => setReminderIntervalMin((v) => Math.max(1, Number(v) - 1))}
+                    aria-label="Remind more often"
+                  >
+                    −
+                  </button>
+                  {reminderIntervalMin}
+                  <button
+                    type="button"
+                    className="stepbtn"
+                    onClick={() => setReminderIntervalMin((v) => Number(v) + 1)}
+                    aria-label="Remind less often"
+                  >
+                    +
+                  </button>
+                </span>
+              </div>
             )}
           </div>
 

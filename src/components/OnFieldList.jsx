@@ -13,7 +13,9 @@ export default function OnFieldList({ players, masterElapsed, onSubOff, onInjure
 
   return (
     <section className="list-section">
-      <h2>On Field ({withStint.length})</h2>
+      <div className="list-eyebrow">
+        <h2>On Field · {withStint.length}</h2>
+      </div>
       {withStint.length === 0 && <p className="muted">No players on the field.</p>}
       <div className="player-list">
         {withStint.map((p, i) => (
@@ -22,8 +24,9 @@ export default function OnFieldList({ players, masterElapsed, onSubOff, onInjure
             number={p.number}
             status="field"
             time={formatMinSec(p.stintSeconds)}
-            timeLabel="this stint"
+            timeLabel="Stint"
             emphasize={i === 0}
+            rankTag={i === 0 ? 'Longest on' : null}
             actions={[
               { label: 'Sub Off', variant: 'btn-primary', onClick: () => onSubOff(p.id) },
               { label: 'Injured', variant: 'btn-danger-outline', onClick: () => onInjure(p.id) },

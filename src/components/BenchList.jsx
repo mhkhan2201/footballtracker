@@ -9,7 +9,9 @@ export default function BenchList({ players, canBringOn, onBringOn, onInjure }) 
 
   return (
     <section className="list-section">
-      <h2>Bench ({bench.length})</h2>
+      <div className="list-eyebrow">
+        <h2>Bench · {bench.length}</h2>
+      </div>
       {bench.length === 0 && <p className="muted">No players on the bench.</p>}
       <div className="player-list">
         {bench.map((p, i) => (
@@ -18,8 +20,9 @@ export default function BenchList({ players, canBringOn, onBringOn, onInjure }) 
             number={p.number}
             status="bench"
             time={formatMinSec(p.totalSeconds)}
-            timeLabel="total played"
+            timeLabel="Total"
             emphasize={i === 0}
+            rankTag={i === 0 ? 'Up next' : null}
             actions={[
               {
                 label: 'Bring On',
