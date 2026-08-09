@@ -12,7 +12,12 @@ export async function endMatchWithReport(state, dispatch) {
     await shareOrDownloadFile(filename, csv, 'text/csv');
   } catch (e) {
     // Report generation/offering must never block ending the match — a
-    // coach at full time needs the wipe to happen no matter what.
+    // coach at full time needs the wipe to happen no matter what. This was
+    // previously a silent catch, which is exactly how a real failure here
+    // could look like "nothing happened" with zero trace. Logging is kept
+    // permanently (not just for this investigation) since it's a genuine
+    // last-resort safety net that should never fire in normal operation.
+    console.error('[report] endMatchWithReport: report generation/offering failed unexpectedly ->', e && e.name, '-', e && e.message, e);
   } finally {
     dispatch({ type: 'END_MATCH' });
   }
