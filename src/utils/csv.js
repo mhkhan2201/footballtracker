@@ -1,7 +1,7 @@
 // Pure client-side CSV report generator, read-only against MatchContext
 // state — no server, no new dependency. Called once, right when the
 // End Match hold-to-confirm completes, before the state wipe.
-import { getElapsedMs, formatClock } from './time';
+import { getElapsedMs, formatClock, formatMinSec } from './time';
 
 function csvField(value) {
   const str = String(value ?? '');
@@ -43,13 +43,15 @@ export function buildMatchReportCsv(state, { now = Date.now(), date = new Date()
         : 0;
     return {
       number: p.number,
-      totalMinutes: (p.totalSeconds + liveStintSeconds) / 60,
+      totalSeconds: p.totalSeconds + liveStintSeconds,
       stintCount: p.stintCount || 0,
       everInjured: !!p.everInjured,
     };
   });
 
-  rows.sort((a, b) => b.totalMinutes - a.totalMinutes);
+  // Descending by actual time played — "Did not play" rows have 0 seconds
+  // and naturally fall to the bottom of this same sort, no special-casing.
+  rows.sort((a, b) => b.totalSeconds - a.totalSeconds);
 
   // masterElapsed is the app's own clock: it pauses for stoppages and for
   // half-time, and never resets between halves (see matchReducer.js), so
@@ -61,8 +63,15 @@ export function buildMatchReportCsv(state, { now = Date.now(), date = new Date()
     csvRow([
       `Match report — ${dateStamp(date)} — Actual match time ${actualMatchTime} (ended in Half ${state.half}) — Half length used ${state.halfLengthMin} min — Field slots ${state.fieldSlots}`,
     ]),
-    csvRow(['Shirt Number', 'Total Minutes', 'Stints', 'Injured']),
-    ...rows.map((r) => csvRow([r.number, r.totalMinutes.toFixed(1), r.stintCount, r.everInjured ? 'yes' : 'no'])),
+    csvRow(['Shirt Number', 'Time Played', 'Stints', 'Injured']),
+    ...rows.map((r) =>
+      csvRow([
+        r.number,
+        r.stintCount === 0 ? 'Did not play' : formatMinSec(r.totalSeconds),
+        r.stintCount,
+        r.everInjured ? 'yes' : 'no',
+      ])
+    ),
   ];
 
   return lines.join('\r\n') + '\r\n';
