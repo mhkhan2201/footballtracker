@@ -11,8 +11,18 @@
 // keep chasing share-target-specific behavior, this now always uses a
 // single, deterministic Blob + <a download> link — one file, every time,
 // on every browser, with no OS-level handoff involved.
+
+const UTF8_BOM = '\uFEFF';
+
 export function downloadFile(filename, content, mimeType) {
-  const blob = new Blob([content], { type: mimeType });
+  // Prepend a UTF-8 BOM for CSV specifically: Excel doesn't assume UTF-8 for
+  // a BOM-less .csv, so the em dashes in the report's header line render as
+  // mojibake (â€”) instead of "—". Plain text editors and the phone's own
+  // file viewer ignore a leading BOM harmlessly, so this is safe everywhere.
+  const isCsv = mimeType.includes('csv');
+  const body = isCsv ? UTF8_BOM + content : content;
+  const type = mimeType.includes('charset') ? mimeType : `${mimeType};charset=utf-8`;
+  const blob = new Blob([body], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
