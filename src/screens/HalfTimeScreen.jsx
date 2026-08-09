@@ -6,6 +6,7 @@ import { getElapsedMs, formatClock } from '../utils/time';
 import { playAlertBeep, vibrateAlert } from '../utils/audio';
 import Icon from '../components/Icon';
 import EndMatchDialog from '../components/EndMatchDialog';
+import { endMatchWithReport } from '../utils/endMatch';
 
 export default function HalfTimeScreen() {
   const state = useMatchState();
@@ -57,7 +58,7 @@ export default function HalfTimeScreen() {
 
       {showEndDialog && (
         <EndMatchDialog
-          onConfirm={() => dispatch({ type: 'END_MATCH' })}
+          onConfirm={() => endMatchWithReport(state, dispatch)}
           onCancel={() => setShowEndDialog(false)}
         />
       )}

@@ -12,6 +12,13 @@ import { clearState } from '../utils/storage';
 // Player.stintStartElapsedMs: master-elapsed ms at which the current on-field
 //   stint began (null unless status === 'field').
 // Player.totalSeconds: banked playing time from completed stints.
+// Player.stintCount: how many separate times this player has been on the
+//   field (starts at 1 for starters, incremented on SUB/BRING_ON) — exists
+//   solely so the end-of-match CSV report can show it; nothing else reads it.
+// Player.everInjured: true once MARK_INJURED has ever fired for this player,
+//   and never cleared by UN_INJURE — same reasoning, feeds the CSV report's
+//   injured flag after a player who was injured and came back is no longer
+//   "currently" injured.
 
 function newClock(running = false) {
   return { running, startedAt: running ? Date.now() : null, accumulatedMs: 0 };
@@ -43,6 +50,8 @@ function makePlayer(number, status) {
     stintStartElapsedMs: status === 'field' ? 0 : null,
     totalSeconds: 0,
     preInjuryStatus: null,
+    stintCount: status === 'field' ? 1 : 0,
+    everInjured: false,
   };
 }
 
@@ -99,7 +108,7 @@ export function matchReducer(state, action) {
           };
         }
         if (p.id === onId) {
-          return { ...p, status: 'field', stintStartElapsedMs: masterElapsed };
+          return { ...p, status: 'field', stintStartElapsedMs: masterElapsed, stintCount: p.stintCount + 1 };
         }
         return p;
       });
@@ -113,7 +122,7 @@ export function matchReducer(state, action) {
       const now = Date.now();
       const masterElapsed = getElapsedMs(state.clock, now);
       const players = state.players.map((p) =>
-        p.id === id ? { ...p, status: 'field', stintStartElapsedMs: masterElapsed } : p
+        p.id === id ? { ...p, status: 'field', stintStartElapsedMs: masterElapsed, stintCount: p.stintCount + 1 } : p
       );
       return { ...state, players };
     }
@@ -132,9 +141,10 @@ export function matchReducer(state, action) {
             preInjuryStatus: 'field',
             stintStartElapsedMs: null,
             totalSeconds: p.totalSeconds + Math.max(0, stintSec),
+            everInjured: true,
           };
         }
-        return { ...p, status: 'injured', preInjuryStatus: p.status };
+        return { ...p, status: 'injured', preInjuryStatus: p.status, everInjured: true };
       });
       return { ...state, players };
     }

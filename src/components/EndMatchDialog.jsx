@@ -22,8 +22,9 @@ export default function EndMatchDialog({ onConfirm, onCancel }) {
         </div>
         <h1>End the match?</h1>
         <p className="muted">
-          This clears the clock, every substitution, and every player's playing time from this
-          device. It can't be undone.
+          You'll be offered a CSV report of playing time to save first — then this clears the
+          clock, every substitution, and every player's time from this device. It can't be
+          undone.
         </p>
 
         <button

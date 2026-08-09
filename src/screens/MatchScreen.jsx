@@ -11,6 +11,7 @@ import InjuredList from '../components/InjuredList';
 import SubPicker from '../components/SubPicker';
 import ReminderToast from '../components/ReminderToast';
 import EndMatchDialog from '../components/EndMatchDialog';
+import { endMatchWithReport } from '../utils/endMatch';
 
 export default function MatchScreen() {
   const state = useMatchState();
@@ -108,7 +109,7 @@ export default function MatchScreen() {
 
       {showEndDialog && (
         <EndMatchDialog
-          onConfirm={() => dispatch({ type: 'END_MATCH' })}
+          onConfirm={() => endMatchWithReport(state, dispatch)}
           onCancel={() => setShowEndDialog(false)}
         />
       )}
