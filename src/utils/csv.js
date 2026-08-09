@@ -1,7 +1,7 @@
 // Pure client-side CSV report generator, read-only against MatchContext
 // state — no server, no new dependency. Called once, right when the
 // End Match hold-to-confirm completes, before the state wipe.
-import { getElapsedMs } from './time';
+import { getElapsedMs, formatClock } from './time';
 
 function csvField(value) {
   const str = String(value ?? '');
@@ -51,9 +51,15 @@ export function buildMatchReportCsv(state, { now = Date.now(), date = new Date()
 
   rows.sort((a, b) => b.totalMinutes - a.totalMinutes);
 
+  // masterElapsed is the app's own clock: it pauses for stoppages and for
+  // half-time, and never resets between halves (see matchReducer.js), so
+  // it's exactly "how long the match actually was" on the timer the coach
+  // was watching — not the configured half length, which is just the plan.
+  const actualMatchTime = formatClock(masterElapsed);
+
   const lines = [
     csvRow([
-      `Match report — ${dateStamp(date)} — Half length ${state.halfLengthMin} min — Field slots ${state.fieldSlots}`,
+      `Match report — ${dateStamp(date)} — Actual match time ${actualMatchTime} (ended in Half ${state.half}) — Half length used ${state.halfLengthMin} min — Field slots ${state.fieldSlots}`,
     ]),
     csvRow(['Shirt Number', 'Total Minutes', 'Stints', 'Injured']),
     ...rows.map((r) => csvRow([r.number, r.totalMinutes.toFixed(1), r.stintCount, r.everInjured ? 'yes' : 'no'])),
